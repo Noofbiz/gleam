@@ -9,4 +9,5 @@
 
 int initializeGleam();
 int appDone();
-uintptr_t newWindow(int width, int height, char* title);
+uintptr_t newWindow(int width, int height, char* title, bool titled, bool bordered,
+bool closable, bool miniaturizable, bool resizable, bool fullscreen);

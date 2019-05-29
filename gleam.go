@@ -1,6 +1,7 @@
 package gleam
 
 import (
+	"log"
 	"runtime"
 )
 
@@ -8,18 +9,44 @@ func init() {
 	runtime.LockOSThread()
 }
 
-// Main is the executable's entry point. Uses the smae app.App as gomobile to
-// simplify design.
-func Main(mainFunc func(a *App)) {
+var (
+	initCh chan struct{}
+	errCh  chan error
+)
+
+// Run runs the app. It initalizes the window system, then runs the app's
+// Preload, Main, and Cleanup functions, and then cleans up the OSes window system.
+func Run(a App) {
+	initCh = make(chan struct{})
+	errCh = make(chan error)
+	// error logging goroutine
+	go func() {
+		for {
+			err := <-errCh
+			if err != nil {
+				switch currentErrorLevel {
+				case ErrorLevelLog:
+					log.Printf("gleam error: %v\n", err.Error())
+				case ErrorLevelPanic:
+					panic("gleam error: " + err.Error())
+				case ErrorLevelIgnore:
+					//do nothing
+				}
+			}
+		}
+	}()
 	//run mainfunc on a separate goroutine
 	go func() {
-		mainFunc(&App{})
+		<-initCh
+		errCh <- a.Preload()
+		errCh <- a.Main()
+		errCh <- a.Cleanup()
 		appDone()
 	}()
 	//initalize Gleam on main thread
-	initGleam()
+	errCh <- initGleam()
 	//clean up Gleam when done
-	cleanup()
+	errCh <- cleanup()
 }
 
 // initGleam initalizes Gleam in an OS specific way. This is called during Main

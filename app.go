@@ -1,3 +1,7 @@
 package gleam
 
-type App struct{}
+type App interface {
+	Preload() error
+	Main() error
+	Cleanup() error
+}

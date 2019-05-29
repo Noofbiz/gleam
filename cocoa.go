@@ -40,7 +40,14 @@ func appDoneImpl() error {
 func newWindowImpl(w *Window) error {
 	title := C.CString(w.opts.Title)
 	defer C.free(unsafe.Pointer(title))
-	data := C.newWindow(C.int(w.opts.Width), C.int(w.opts.Height), title)
+	data := C.newWindow(C.int(w.opts.Width), C.int(w.opts.Height), title,
+		C.bool(w.opts.Titled), C.bool(w.opts.Bordered), C.bool(w.opts.Closable),
+		C.bool(w.opts.Miniaturizable), C.bool(w.opts.Resizable), C.bool(w.opts.FullScreen))
 	w.data = uintptr(data)
 	return nil
+}
+
+//export gleamInitDoneSignal
+func gleamInitDoneSignal() {
+	initCh <- struct{}{}
 }

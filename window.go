@@ -5,7 +5,7 @@ type Window struct {
 	opts WindowOptions
 }
 
-func (a *App) NewWindow(options WindowOptions) (*Window, error) {
+func NewWindow(options WindowOptions) (*Window, error) {
 	w := &Window{}
 	w.opts = options
 	if err := newWindowImpl(w); err != nil {
