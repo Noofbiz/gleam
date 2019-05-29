@@ -2,12 +2,7 @@ package gleam
 
 import (
 	"log"
-	"runtime"
 )
-
-func init() {
-	runtime.LockOSThread()
-}
 
 var (
 	initCh chan struct{}

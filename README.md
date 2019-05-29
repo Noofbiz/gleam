@@ -5,7 +5,7 @@ shiny, gleam aims to be a library for creating platform native image.Image, open
 windows as well as getting input for your applications.
 
 It is currently in development and probably won't be ready for production use
-for quite some time.
+for quite some time, if ever. It's mostly just for fun right now.
 
 Target platforms are:
 
