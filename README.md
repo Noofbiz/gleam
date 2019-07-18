@@ -12,24 +12,24 @@ Target platforms are:
 [X] Cocoa
   [X] Window Creation
     [X] Width, Height
-    [ ] Title
+    [X] Title
       [X] Start
-      [ ] Update
-    [ ] Position
+      [X] Update
+    [X] Position
       [X] Start
-      [ ] Update
-    [ ] NotResizable
+      [X] Update
+    [X] NotResizable
       [X] Start
-      [ ] Update
+      [X] Update
     [ ] Menu
       [ ] Start
       [ ] Update
-    [ ] Multiple Windows
+    [X] Multiple Windows
       [X] Can open multiple windows
-      [ ] Can update / change different windows
-    [ ] Full Screen
+      [X] Can update / change different windows
+    [X] Full Screen
       [X] Start
-      [ ] Update
+      [X] Update
     [ ] Closing / Cleanup
   [ ] Can print an image.Image to the screen
   [ ] OpenGL surface

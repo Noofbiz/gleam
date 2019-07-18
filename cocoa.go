@@ -24,7 +24,7 @@ func init() {
 func initImpl() error {
 	err := C.initializeGleam()
 	if err != 0 {
-		return errors.New("unable to initalize gleam")
+		return errors.New("COCOA: unable to initalize gleam")
 	}
 	return nil
 }
@@ -32,7 +32,7 @@ func initImpl() error {
 func appDoneImpl() error {
 	err := C.appDone()
 	if err != 0 {
-		return errors.New("failed to complete app done")
+		return errors.New("COCOA: failed to complete app done")
 	}
 	return nil
 }
@@ -40,10 +40,63 @@ func appDoneImpl() error {
 func newWindowImpl(w *Window) error {
 	title := C.CString(w.opts.Title)
 	defer C.free(unsafe.Pointer(title))
-	data := C.newWindow(C.int(w.opts.Width), C.int(w.opts.Height), title,
-		C.bool(w.opts.Titled), C.bool(w.opts.Bordered), C.bool(w.opts.Closable),
-		C.bool(w.opts.Miniaturizable), C.bool(w.opts.Resizable), C.bool(w.opts.FullScreen))
+	data := C.newWindow(C.int(w.opts.Width), C.int(w.opts.Height),
+		C.int(w.opts.X), C.int(w.opts.Y), title, C.bool(w.opts.Resizable),
+		C.bool(w.opts.FullScreen))
 	w.data = uintptr(data)
+	return nil
+}
+
+func setTitleImpl(w *Window, s string) error {
+	title := C.CString(s)
+	defer C.free(unsafe.Pointer(title))
+	err := C.setTitle(C.uintptr_t(w.data), title)
+	if err != 0 {
+		return errors.New("COCOA: unable to set title")
+	}
+	return nil
+}
+
+func setFullScreenImpl(w *Window) error {
+	err := C.setFullScreen(C.uintptr_t(w.data))
+	if err != 0 {
+		return errors.New("COCOA: unable to set full screen")
+	}
+	return nil
+}
+
+func resizeImpl(w *Window, width, height int) error {
+	err := C.resize(C.uintptr_t(w.data), C.int(width), C.int(height), C.int(w.opts.X), C.int(w.opts.Y), C.bool(w.opts.Resizable))
+	if err != 0 {
+		return errors.New("COCOA: unable to resize window")
+	}
+	return nil
+}
+
+func moveImpl(w *Window, x, y int) error {
+	err := C.resize(C.uintptr_t(w.data), C.int(w.opts.Width), C.int(w.opts.Height), C.int(x), C.int(y), C.bool(w.opts.Resizable))
+	if err != 0 {
+		return errors.New("COCOA: unable to move window")
+	}
+	return nil
+}
+
+func setResizableImpl(w *Window, b bool) error {
+	err := C.resize(C.uintptr_t(w.data), C.int(w.opts.Width), C.int(w.opts.Height), C.int(w.opts.X), C.int(w.opts.Y), C.bool(b))
+	if err != 0 {
+		if b {
+			return errors.New("COCOA: unable to set window resizable")
+		}
+		return errors.New("COCOA: unable to unset window resizable")
+	}
+	return nil
+}
+
+func closeImpl(w *Window) error {
+	err := C.closeWindow(C.uintptr_t(w.data))
+	if err != 0 {
+		return errors.New("COCOA: unable to close window")
+	}
 	return nil
 }
 

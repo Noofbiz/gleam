@@ -88,21 +88,60 @@ int appDone() {
   return 0;
 }
 
-uintptr_t newWindow(int width, int height, char* title, bool titled, bool bordered,
-bool closable, bool miniaturizable, bool resizable, bool fullscreen) {
+int setTitle(uintptr_t w, char* title) {
+  dispatch_sync(dispatch_get_main_queue(), ^{
+    NSString* name = [[NSString alloc] initWithUTF8String:title];
+    NSWindow* window = (NSWindow*)w;
+    window.title = name;
+  });
+  return 0;
+}
+
+int setFullScreen(uintptr_t w) {
+  NSScreen *screen = [NSScreen mainScreen];
+  NSUInteger mask = NSWindowStyleMaskBorderless;
+  NSRect frame = screen.frame;
+  dispatch_sync(dispatch_get_main_queue(), ^{
+    NSWindow* window = (NSWindow*)w;
+    [window setStyleMask: mask];
+    [window setFrame: frame display: YES animate: NO];
+  });
+  return 0;
+}
+
+int resize(uintptr_t w, int width, int height, int x, int y, bool resizable) {
+  NSScreen *screen = [NSScreen mainScreen];
+	double wid = (double)width / [screen backingScaleFactor];
+	double h = (double)height / [screen backingScaleFactor];
+  __block NSUInteger mask = NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskMiniaturizable;
+  dispatch_sync(dispatch_get_main_queue(), ^{
+    NSWindow* window = (NSWindow*)w;
+    NSRect frame = NSMakeRect(0, 0, wid, h);
+    [window setStyleMask: mask];
+    [window setFrame: frame display: YES animate: NO];
+    [window cascadeTopLeftFromPoint:NSMakePoint(x,y)];
+    if (resizable) {
+      mask |= NSWindowStyleMaskResizable;
+      [window setStyleMask: mask];
+    }
+  });
+  return 0;
+}
+
+int closeWindow(uintptr_t w) {
+  dispatch_sync(dispatch_get_main_queue(), ^{
+    NSWindow* window = (NSWindow*)w;
+    [window close];
+  });
+  return 0;
+}
+
+uintptr_t newWindow(int width, int height, int x, int y, char* title, bool resizable, bool fullscreen) {
   WindowDelegate *delegate = [[WindowDelegate alloc] init];
   NSScreen *screen = [NSScreen mainScreen];
 	double w = (double)width / [screen backingScaleFactor];
 	double h = (double)height / [screen backingScaleFactor];
-  NSUInteger mask = 0;
-  if (!bordered)
-    mask |= NSWindowStyleMaskBorderless;
-  if (titled)
-    mask |= NSWindowStyleMaskTitled;
-  if (closable)
-    mask |= NSWindowStyleMaskClosable;
-  if (miniaturizable)
-    mask |= NSWindowStyleMaskMiniaturizable;
+  NSUInteger mask = NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskMiniaturizable;
   if (resizable)
     mask |= NSWindowStyleMaskResizable;
   if (fullscreen)
@@ -120,6 +159,8 @@ bool closable, bool miniaturizable, bool resizable, bool fullscreen) {
     [window setBackgroundColor:[NSColor blueColor]];
     window.title = name;
     [window setDelegate:delegate];
+    if (!fullscreen)
+      [window cascadeTopLeftFromPoint:NSMakePoint(x+1,y+1)];
     [NSApp activateIgnoringOtherApps:YES];
     [window makeKeyAndOrderFront:NSApp];
   });
