@@ -36,12 +36,13 @@ func Run(a App) {
 		errCh <- a.Preload()
 		errCh <- a.Main()
 		errCh <- a.Cleanup()
-		appDone()
+		errCh <- appDone()
 	}()
 	//initalize Gleam on main thread
 	errCh <- initGleam()
 	//clean up Gleam when done
 	errCh <- cleanup()
+	close(errCh)
 }
 
 // initGleam initalizes Gleam in an OS specific way. This is called during Main

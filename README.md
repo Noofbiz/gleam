@@ -30,7 +30,12 @@ Target platforms are:
     [X] Full Screen
       [X] Start
       [X] Update
-    [ ] Closing / Cleanup
+    [X] Closing / Cleanup
+    [ ] Contexts
+      [ ] OpenGL
+      [ ] Vulkan / Molten
+      [ ] Metal
+      [ ] Image
   [ ] Can print an image.Image to the screen
   [ ] OpenGL surface
   [ ] Vulkan support

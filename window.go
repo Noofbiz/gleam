@@ -1,5 +1,7 @@
 package gleam
 
+import "image/color"
+
 // Window is a OS window.
 type Window struct {
 	data uintptr
@@ -105,6 +107,13 @@ func (w *Window) Close() error {
 	if err := closeImpl(w); err != nil {
 		return err
 	}
-	w = nil
+	return nil
+}
+
+// SetBgColor sets the background color of the window.
+func (w *Window) SetBgColor(c color.Color) error {
+	if err := setBgColorImpl(w, c); err != nil {
+		return err
+	}
 	return nil
 }

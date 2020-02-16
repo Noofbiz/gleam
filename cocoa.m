@@ -82,9 +82,17 @@ int initializeGleam() {
 }
 
 int appDone() {
-  dispatch_async(dispatch_get_main_queue(), ^{
-		[NSApp terminate:nil];
-	});
+	[NSApp stop:nil];
+  NSEvent* event = [NSEvent otherEventWithType:NSEventTypeApplicationDefined
+                    location:NSMakePoint(0, 0)
+                    modifierFlags:0
+                    timestamp:0
+                    windowNumber:0
+                    context:nil
+                    subtype:0
+                    data1:0
+                    data2:0];
+  [NSApp postEvent:event atStart:YES];
   return 0;
 }
 
@@ -129,18 +137,35 @@ int resize(uintptr_t w, int width, int height, int x, int y, bool resizable) {
 }
 
 int closeWindow(uintptr_t w) {
+  NSWindow* window = (NSWindow*)w;
+  [window close];
+  return 0;
+}
+
+int setBgColor(uintptr_t w, uint32_t red, uint32_t green, uint32_t blue, uint32_t alpha) {
+  double r = (double)red / (double)0xffff;
+  double g = (double)green / (double)0xffff;
+  double b = (double)blue / (double)0xffff;
+  double a = (double)alpha / (double)0xffff;
   dispatch_sync(dispatch_get_main_queue(), ^{
     NSWindow* window = (NSWindow*)w;
-    [window close];
+    [window setBackgroundColor:[NSColor colorWithCalibratedRed:(CGFloat)r
+                                green:(CGFloat)g
+                                blue:(CGFloat)b
+                                alpha:(CGFloat)a]];
   });
   return 0;
 }
 
-uintptr_t newWindow(int width, int height, int x, int y, char* title, bool resizable, bool fullscreen) {
+uintptr_t newWindow(int width, int height, int x, int y, char* title, bool resizable, bool fullscreen, uint32_t red, uint32_t green, uint32_t blue, uint32_t alpha) {
   WindowDelegate *delegate = [[WindowDelegate alloc] init];
   NSScreen *screen = [NSScreen mainScreen];
 	double w = (double)width / [screen backingScaleFactor];
 	double h = (double)height / [screen backingScaleFactor];
+  double r = (double)red / (double)0xffff;
+  double g = (double)green / (double)0xffff;
+  double b = (double)blue / (double)0xffff;
+  double a = (double)alpha / (double)0xffff;
   NSUInteger mask = NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskMiniaturizable;
   if (resizable)
     mask |= NSWindowStyleMaskResizable;
@@ -156,7 +181,10 @@ uintptr_t newWindow(int width, int height, int x, int y, char* title, bool resiz
                       styleMask:mask
                       backing:NSBackingStoreBuffered
                       defer:NO] autorelease];
-    [window setBackgroundColor:[NSColor blueColor]];
+    [window setBackgroundColor:[NSColor colorWithCalibratedRed:(CGFloat)r
+                                green:(CGFloat)g
+                                blue:(CGFloat)b
+                                alpha:(CGFloat)a]];
     window.title = name;
     [window setDelegate:delegate];
     if (!fullscreen)
