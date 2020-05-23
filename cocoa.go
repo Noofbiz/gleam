@@ -14,13 +14,8 @@ import "C"
 import (
 	"errors"
 	"image/color"
-	"runtime"
 	"unsafe"
 )
-
-func init() {
-	runtime.LockOSThread()
-}
 
 func initImpl() error {
 	err := C.initializeGleam()

@@ -10,6 +10,8 @@ package gleam
 // Step (1) is everything done before calling gleam.Run(app), and step (5) is
 // anything that comes after it returns. This interface provides functions for
 // the rest of the steps. Preload is (2), Main is (3), and Cleanup is (4).
+// Note: these functions are not run on the original main thread. The original
+// main thread is used for the native window system
 type App interface {
 	Preload() error
 	Main() error
